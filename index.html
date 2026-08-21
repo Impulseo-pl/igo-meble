@@ -22,8 +22,49 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css?v=eaff466c">
+<style id="wejscie-css">
+/* === WEJŚCIE NA STRONĘ (kurtyna z logo) - tylko strona główna === */
+#wejscie{display:none;position:fixed;inset:0;z-index:2000;background:#fff;align-items:center;justify-content:center;transition:opacity .5s var(--ease,cubic-bezier(.25,.46,.45,.94)),visibility .5s}
+html.wj-play #wejscie{display:flex}
+html.wj-play:not(.wj-done){overflow:hidden}
+html.wj-done #wejscie{opacity:0;visibility:hidden;pointer-events:none}
+.wj-box{text-align:center;padding:0 24px}
+.wj-logo{height:clamp(118px,19vw,186px);width:auto;margin:0 auto;mix-blend-mode:multiply;opacity:0;transform:translateY(12px);animation:wj-in .52s var(--ease,cubic-bezier(.25,.46,.45,.94)) forwards}
+.wj-name{margin-top:14px;font-family:var(--font-body,'Manrope',sans-serif);font-size:11px;font-weight:600;letter-spacing:.42em;text-indent:.42em;text-transform:uppercase;color:var(--muted,#70645D);opacity:0;transform:translateY(10px);animation:wj-in .52s var(--ease,cubic-bezier(.25,.46,.45,.94)) .14s forwards}
+.wj-bar{width:104px;height:2px;background:rgba(43,29,20,.12);border-radius:2px;margin:22px auto 0;overflow:hidden}
+.wj-bar i{display:block;height:100%;width:100%;background:var(--accent,#B95200);transform:translateX(-100%);animation:wj-load .9s var(--ease,cubic-bezier(.25,.46,.45,.94)) .06s forwards}
+@keyframes wj-in{to{opacity:1;transform:none}}
+@keyframes wj-load{to{transform:translateX(0)}}
+@media (prefers-reduced-motion:reduce){#wejscie{display:none!important}}
+</style>
+<script>
+/* kurtyna: gra raz na wizytę, poniżej 1,2 s, z twardym bezpiecznikiem czasu */
+(function(){try{
+  var d=document.documentElement, powtorz=location.search.indexOf('intro')>-1;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(!powtorz && sessionStorage.getItem('igo-wejscie')) return;
+  try{sessionStorage.setItem('igo-wejscie','1')}catch(e){}
+  d.classList.add('wj-play');
+  var start=Date.now(), zrobione=false;
+  function schowaj(){ if(zrobione) return; zrobione=true; d.classList.add('wj-done'); }
+  function poHero(){ setTimeout(schowaj, Math.max(0, 620-(Date.now()-start))); }
+  var hero=new Image(); hero.src='img/hero.jpg';
+  if(hero.decode){hero.decode().then(poHero).catch(poHero)}else{hero.onload=poHero;hero.onerror=poHero}
+  setTimeout(schowaj,1150);
+  ['click','touchstart','wheel','keydown','scroll'].forEach(function(ev){addEventListener(ev,schowaj,{once:true,passive:true})});
+}catch(e){document.documentElement.classList.add('wj-done')}})();
+</script>
 </head>
 <body>
+
+<div id="wejscie" aria-hidden="true">
+  <div class="wj-box">
+    <img class="wj-logo" src="img/logo.jpg" alt="IGO MEBLE" width="713" height="720" fetchpriority="high" decoding="async">
+    <div class="wj-name">IGO MEBLE &nbsp;&middot;&nbsp; Poznań</div>
+    <div class="wj-bar"><i></i></div>
+  </div>
+</div>
+
 
 <header class="nav">
   <div class="wrap nav-inner">
