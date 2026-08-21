@@ -737,5 +737,59 @@
 })();
 
 
+/* === ZNAK FIRMOWY NA ŚRODKU HERO (układ jak u Meble FRONT) ===
+   Trzy zadania: (a) na czas zasłony podnieść logo dokładnie na środek OKNA,
+   (b) puścić je do jego miejsca w hero, gdy zasłona schodzi, (c) pokazać logo
+   w lewym górnym rogu dopiero wtedy, gdy to duże zniknie z ekranu. */
+(function () {
+  try {
+    var mark = document.querySelector('.hero-mark');
+    if (!mark) return;
+    var h = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (h.classList.contains('intro-on') && !reduce) {
+      /* Ile brakuje logo do środka okna. Mierzymy pozycję DOCELOWĄ, więc na jedną
+         klatkę zdejmujemy przesunięcie - bez tego mierzylibyśmy stan już przesunięty. */
+      mark.classList.add('mierze');
+      var r = mark.getBoundingClientRect();
+      mark.classList.remove('mierze');
+      var dy = Math.round(window.innerHeight / 2 - (r.top + r.height / 2));
+      mark.style.setProperty('--intro-dy', dy + 'px');
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { mark.classList.add('mark-wszedl'); });
+      });
+      /* Bezpiecznik: gdyby klatki nie doszły (karta w tle), logo i tak się pokaże. */
+      setTimeout(function () { mark.classList.add('mark-wszedl'); }, 900);
+    }
+
+    /* Logo w rogu wchodzi, gdy duże wyjedzie za górną krawędź. Liczymy to z pozycji
+       przy przewijaniu, a nie obserwatorem: obserwator bywa uśpiony w karcie
+       otwartej w tle i logo zostawało wtedy ukryte przez całą wizytę.
+       Pozycję bierzemy z offsetTop, bo getBoundingClientRect liczy razem z
+       powiększeniem logo na czas wejścia i dawałby wynik z innego stanu strony. */
+    function dolnaKrawedz() {
+      var y = 0, e = mark;
+      while (e) { y += e.offsetTop; e = e.offsetParent; }
+      return y + mark.offsetHeight;
+    }
+    var prog = dolnaKrawedz(), poza = null;
+    function sprawdz() {
+      var teraz = (window.pageYOffset || document.documentElement.scrollTop || 0) >= prog - 8;
+      if (teraz === poza) return;          /* przełączamy klasę tylko przy zmianie stanu */
+      poza = teraz;
+      document.body.classList.toggle('znak-poza-ekranem', teraz);
+    }
+    window.addEventListener('scroll', sprawdz, { passive: true });
+    window.addEventListener('resize', function () { prog = dolnaKrawedz(); sprawdz(); });
+    window.addEventListener('load', function () { prog = dolnaKrawedz(); sprawdz(); });
+    sprawdz();
+  } catch (e) {
+    document.body.classList.add('znak-poza-ekranem');
+  }
+})();
+
+
 /* === licznik otwarć demo (buy-signal) + geo === */
 (function(){try{if(String(location.protocol).indexOf('http')!==0)return;try{if(/[?&#]team=1/.test(location.search+location.hash)){localStorage.setItem('nb_team','1');}}catch(e){}try{if(localStorage.getItem('nb_team')==='1')return;}catch(e){}if((document.referrer||'').indexOf('crm-newbeginning')>-1)return;try{if(navigator.webdriver)return;}catch(e){}try{if(/^https?:\/\/(kris20032|impulseo-pl)\.github\.io\/?$/i.test(document.referrer||''))return;}catch(e){}if(sessionStorage.getItem('_dv'))return;sessionStorage.setItem('_dv','1');var seg=(location.pathname.split('/').filter(Boolean)[0])||'';var base=location.origin+(seg?('/'+seg):'');var ua='';try{ua=(navigator.userAgent||'').slice(0,300);}catch(e){}var EP='https://zngfubfinbojfgaxdrbf.supabase.co/rest/v1/demo_views';var KEY='sb_publishable_MWwoyGlSCWnJ4awtOPF0ow_ZVS0Y8qK';function send(g){try{fetch(EP,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},body:JSON.stringify({demo_url:base,page:location.pathname,referrer:(document.referrer||null),user_agent:(ua||null),ip:(g&&g.ip)||null,country:(g&&g.cc)||null,city:(g&&g.city)||null})}).catch(function(){});}catch(e){}}var done=false;function once(g){if(done)return;done=true;send(g);}try{var t=setTimeout(function(){once(null);},1500);fetch('https://ipwho.is/?fields=ip,success,country_code,city',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){clearTimeout(t);once(d&&d.success!==false?{ip:d.ip,cc:d.country_code,city:d.city}:null);}).catch(function(){clearTimeout(t);once(null);});}catch(e){once(null);}}catch(e){}})();

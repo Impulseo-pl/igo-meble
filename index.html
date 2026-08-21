@@ -21,54 +21,44 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=eaff466c">
-<style id="wejscie-css">
-/* === WEJŚCIE NA STRONĘ (kurtyna z logo) - tylko strona główna === */
-#wejscie{display:none;position:fixed;inset:0;z-index:2000;background:#fff;align-items:center;justify-content:center;transition:opacity .5s var(--ease,cubic-bezier(.25,.46,.45,.94)),visibility .5s}
-html.wj-play #wejscie{display:flex}
-html.wj-play:not(.wj-done){overflow:hidden}
-html.wj-done #wejscie{opacity:0;visibility:hidden;pointer-events:none}
-.wj-box{text-align:center;padding:0 24px}
-.wj-logo{height:clamp(118px,19vw,186px);width:auto;margin:0 auto;mix-blend-mode:multiply;opacity:0;transform:translateY(12px);animation:wj-in .52s var(--ease,cubic-bezier(.25,.46,.45,.94)) forwards}
-.wj-name{margin-top:14px;font-family:var(--font-body,'Manrope',sans-serif);font-size:11px;font-weight:600;letter-spacing:.42em;text-indent:.42em;text-transform:uppercase;color:var(--muted,#70645D);opacity:0;transform:translateY(10px);animation:wj-in .52s var(--ease,cubic-bezier(.25,.46,.45,.94)) .14s forwards}
-.wj-bar{width:104px;height:2px;background:rgba(43,29,20,.12);border-radius:2px;margin:22px auto 0;overflow:hidden}
-.wj-bar i{display:block;height:100%;width:100%;background:var(--accent,#B95200);transform:translateX(-100%);animation:wj-load .9s var(--ease,cubic-bezier(.25,.46,.45,.94)) .06s forwards}
-@keyframes wj-in{to{opacity:1;transform:none}}
-@keyframes wj-load{to{transform:translateX(0)}}
-@media (prefers-reduced-motion:reduce){#wejscie{display:none!important}}
-</style>
+<link rel="stylesheet" href="assets/styles.css?v=191619f1">
 <script>
-/* kurtyna: gra raz na wizytę, poniżej 1,2 s, z twardym bezpiecznikiem czasu */
-(function(){try{
-  var d=document.documentElement, powtorz=location.search.indexOf('intro')>-1;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if(!powtorz && sessionStorage.getItem('igo-wejscie')) return;
-  try{sessionStorage.setItem('igo-wejscie','1')}catch(e){}
-  d.classList.add('wj-play');
-  var start=Date.now(), zrobione=false;
-  function schowaj(){ if(zrobione) return; zrobione=true; d.classList.add('wj-done'); }
-  function poHero(){ setTimeout(schowaj, Math.max(0, 620-(Date.now()-start))); }
-  var hero=new Image(); hero.src='img/hero.jpg';
-  if(hero.decode){hero.decode().then(poHero).catch(poHero)}else{hero.onload=poHero;hero.onerror=poHero}
-  setTimeout(schowaj,1150);
-  ['click','touchstart','wheel','keydown','scroll'].forEach(function(ev){addEventListener(ev,schowaj,{once:true,passive:true})});
-}catch(e){document.documentElement.classList.add('wj-done')}})();
+/* WEJŚCIE Z LOGO - układ jak u Meble FRONT. Skrypt siedzi w <head> bez defer,
+   żeby strona nie mignęła przed zasłoną. Zasłona w CSS jest domyślnie wyłączona;
+   włącza ją dopiero ta klasa, więc przy wyłączonym JS wejścia po prostu nie ma.
+   Gra RAZ na wizytę; ?intro w adresie = zagraj jeszcze raz (do pokazywania). */
+(function(){
+  try{
+    var h = document.documentElement;
+    h.classList.add('js-on');   /* bez skryptu logo w rogu ma zostać widoczne */
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    var znowu = location.search.indexOf('intro') > -1;
+    if (!znowu && sessionStorage.getItem('igo-intro')) return;
+    try{ sessionStorage.setItem('igo-intro','1'); }catch(e){}
+    h.classList.add('intro-on');
+    var zdjete = false;
+    function koniec(){
+      if (zdjete) return; zdjete = true;
+      h.classList.add('intro-out');
+      setTimeout(function(){ h.classList.remove('intro-on','intro-out'); }, 800);
+    }
+    setTimeout(koniec, 1900);
+    /* twardy bezpiecznik: cokolwiek by nie padło, po 3,6 s zasłony nie ma */
+    setTimeout(function(){ h.classList.remove('intro-on','intro-out'); }, 3600);
+    document.addEventListener('click', koniec);
+    window.addEventListener('wheel', koniec, {passive:true});
+    window.addEventListener('touchstart', koniec, {passive:true});
+    window.addEventListener('keydown', koniec);
+  }catch(e){}
+})();
 </script>
 </head>
-<body>
-
-<div id="wejscie" aria-hidden="true">
-  <div class="wj-box">
-    <img class="wj-logo" src="img/logo.jpg" alt="IGO MEBLE" width="713" height="720" fetchpriority="high" decoding="async">
-    <div class="wj-name">IGO MEBLE &nbsp;&middot;&nbsp; Poznań</div>
-    <div class="wj-bar"><i></i></div>
-  </div>
-</div>
-
+<body class="ma-znak-w-hero">
+<div id="intro" aria-hidden="true"></div>
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand brand-has-logo" href="index.html"><img class="brand-logo" src="img/logo.jpg" alt="IGO MEBLE" width="713" height="720" decoding="async"></a>
+    <a class="brand brand-has-logo" href="index.html"><img class="brand-logo" src="img/logo-r.png" alt="IGO MEBLE" width="672" height="373" decoding="async"></a>
     <nav class="nav-links">
       <a href="index.html" class="active" aria-current="page">Strona główna</a>
       <a href="realizacje.html">Realizacje</a>
@@ -82,18 +72,24 @@ html.wj-done #wejscie{opacity:0;visibility:hidden;pointer-events:none}
 </header>
 
 <main>
-<section class="hero-cine">
+<section class="hero-cine hero-srodek">
   <img src="img/hero.jpg" fetchpriority="high" data-rotate="img/g13.jpg|img/g14.jpg" alt="IGO MEBLE - Meble na wymiar w Poznaniu. Od pomiaru po montaż. " width="1880" height="1253">
   <div class="wrap">
     <div class="hero-copy">
-      <div class="brandmark bm-l"><span class="bm-line"><span>IGO MEBLE</span></span></div>
+      <!-- Znak firmowy: dwie warstwy tego samego logo. Kolorowa jest widoczna na zasłonie
+           wejścia, jasna na zdjęciu - przy zdejmowaniu zasłony jedna przechodzi w drugą,
+           więc logo "zmienia kolor" zamiast mrugnąć. -->
+      <div class="hero-mark">
+        <img class="mark-ciemne" src="img/logo-r.png" alt="" aria-hidden="true" width="672" height="373">
+        <img class="mark-jasne" src="img/logo-jasne.png" alt="IGO MEBLE" width="672" height="373">
+      </div>
       <h1>Meble na wymiar w Poznaniu. Od pomiaru po montaż. </h1>
-      <p class="lead">Najpierw pomiar i projekt, decyzja potem. Mebel powstaje pod Twoje wnętrze - ze skosem i krzywą ścianą włącznie.</p>
+      <p class="lead">Kuchnie, szafy i zabudowy robione pod konkretne wnętrze. Pomiar i projekt bez opłat, montaż z gwarancją.</p>
       <div class="hero-actions">
         <a href="realizacje.html" class="btn btn-accent">Zobacz realizacje <span class="arr">→</span></a>
         <a href="kontakt.html" class="btn btn-ghost btn-on-dark">Zapytaj o wycenę</a>
       </div>
-      <div style="margin-top:var(--space-6);color:#fff;font-weight:600;letter-spacing:.02em;opacity:.92"><span class="g-badge"><svg class="gb-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg><b class="gb-ocena">5,0</b><svg class="gb-stars" viewBox="0 0 90 18" width="74" height="14.8" aria-hidden="true"><g fill="currentColor" opacity=".26"><path transform="translate(0,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(18,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(36,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(54,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(72,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/></g><clipPath id="gs1000"><rect x="0" y="0" width="90.0" height="18"/></clipPath><g fill="#FBBC04" clip-path="url(#gs1000)"><path transform="translate(0,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(18,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(36,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(54,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(72,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/></g></svg><span class="gb-txt">11 opinii w Google</span></span></div>
+      <div class="hero-ocena"><span class="g-badge"><svg class="gb-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg><b class="gb-ocena">5,0</b><svg class="gb-stars" viewBox="0 0 90 18" width="74" height="14.8" aria-hidden="true"><g fill="currentColor" opacity=".26"><path transform="translate(0,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(18,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(36,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(54,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(72,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/></g><clipPath id="gs1000"><rect x="0" y="0" width="90.0" height="18"/></clipPath><g fill="#FBBC04" clip-path="url(#gs1000)"><path transform="translate(0,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(18,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(36,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(54,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/><path transform="translate(72,0)" d="M9 1.6l2.2 4.46 4.92.72-3.56 3.47.84 4.9L9 12.74l-4.4 2.31.84-4.9L1.88 6.68l4.92-.72L9 1.6Z"/></g></svg><span class="gb-txt">11 opinii w Google</span></span></div>
     </div>
   </div>
 </section>
@@ -209,6 +205,6 @@ html.wj-done #wejscie{opacity:0;visibility:hidden;pointer-events:none}
 <div class="sticky-reserve"><a class="sr-book" href="kontakt.html">Zapytaj o wycenę</a><a class="sr-call" href="tel:+48536866100" aria-label="Zadzwoń"><svg class="ico-tel" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.58 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.58 3.6a1 1 0 0 1-.25 1l-2.23 2.2Z" fill="currentColor"/></svg></a></div>
 <div class="demo-wazne" data-do="2026-08-20" data-cykl="3" hidden><svg class="dw-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.6" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.2V12l3.3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="dw-txt"></span></div>
 
-<script src="assets/main.js"></script>
+<script src="assets/main.js?v=276296d0"></script>
 </body>
 </html>
